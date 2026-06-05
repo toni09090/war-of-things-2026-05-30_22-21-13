@@ -7,11 +7,10 @@ public class PlayerController : MonoBehaviour
     Rigidbody2D rd;
     float acceleration;
     float maxspeed;
+    float mayspeed;
     float jumpforce;
-    float lastXSpeed;
-    bool isgrounded;
-    bool waspressed;
-    bool justJumped = false;  // 방금 점프했는지 표시
+    float timer; //반천장 위에서 점프 가능하게 하기 위한 타이머
+    bool isgrounded = false;
     void Start()
     {
         rd = GetComponent<Rigidbody2D>();
@@ -19,8 +18,10 @@ public class PlayerController : MonoBehaviour
         rd.constraints = RigidbodyConstraints2D.FreezeRotation;
         acceleration = 0.1f;
         maxspeed = 10.0f;
-        jumpforce = 50f;
-        isgrounded = true;
+        mayspeed = -30.0f;
+        jumpforce = 40f;
+        timer = 0f;
+        isgrounded = false;
     }
 
     // Update is called once per frame
@@ -44,7 +45,7 @@ public class PlayerController : MonoBehaviour
                 xspeed = -maxspeed;
             }
             rd.linearVelocity = new Vector2(xspeed, rd.linearVelocity.y);
-            lastXSpeed = xspeed;
+            
         }
         else
         {
@@ -55,29 +56,40 @@ public class PlayerController : MonoBehaviour
             }
             rd.linearVelocity = new Vector2(xspeed, rd.linearVelocity.y);
         }
-
+        if (timer > 0.05f)
+        {
+            isgrounded = true;
+        }
         // 점프 입력 처리
         if (Keyboard.current.wKey.isPressed && isgrounded)
         {
-            lastXSpeed = rd.linearVelocity.x;  // 점프 전 x 속도 저장
             rd.linearVelocity = new Vector2(rd.linearVelocity.x, jumpforce);
             isgrounded = false;
-            justJumped = true;  // 점프 플래그 설정
         }
         
         
-
-        rd.AddForce(new Vector2(0, -10));
+        if (!(isgrounded))
+        {
+            rd.AddForce(new Vector2(0, -10));
+            if (mayspeed > rd.linearVelocity.y)
+            {
+                rd.linearVelocity = new Vector2(rd.linearVelocity.x, mayspeed);
+            }
+        }
+        else
+        {
+            rd.linearVelocity = new Vector2(rd.linearVelocity.x, 0);
+        }
     }
     void OnCollisionStay2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
         {
-            // 위에서 내려올 때만 (y <= 0)
-            if (rd.linearVelocity.y <= 0)
-            {
-                isgrounded = true;
-            }
+            isgrounded = true;
+        }
+        if (collision.gameObject.CompareTag("cilling"))
+        {
+            timer += Time.deltaTime;
         }
     }
 
@@ -85,29 +97,22 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Ground"))
         {
-            // 위에서 내려올 때 (y <= 0)
-            if (rd.linearVelocity.y <= 0)
-            {
-                isgrounded = true;
-                if (justJumped)
-                {
-                    rd.linearVelocity = new Vector2(lastXSpeed, rd.linearVelocity.y);
-                    justJumped = false;
-                }
-            }
-            // 아래에서 올라올 때 (y > 0) - 천장이므로 붙지 않게
-            else
-            {
-                rd.linearVelocity = new Vector2(rd.linearVelocity.x, -0.1f);
-            }
+            isgrounded = true;
+        }
+        else if (collision.gameObject.CompareTag("cilling"))
+        {
+            rd.transform.position = new Vector2(rd.transform.position.x, rd.transform.position.y - 0.1f);
+            rd.linearVelocity = new Vector2(rd.linearVelocity.x, 0);
+            timer = 0f;
         }
     }
 
     void OnCollisionExit2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Ground"))
+        if (collision.gameObject.CompareTag("Ground") || collision.gameObject.CompareTag("cilling"))
         {
             isgrounded = false;
+            timer = 0f;
         }
     }
 }
