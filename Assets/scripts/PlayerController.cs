@@ -16,7 +16,7 @@ public class PlayerController : MonoBehaviour
         rd = GetComponent<Rigidbody2D>();
         rd.gravityScale = 1f;
         rd.constraints = RigidbodyConstraints2D.FreezeRotation;
-        acceleration = 0.1f;
+        acceleration = 1f;
         maxspeed = 10.0f;
         mayspeed = -30.0f;
         jumpforce = 40f;
@@ -59,31 +59,30 @@ public class PlayerController : MonoBehaviour
         if (timer > 0.05f)
         {
             isgrounded = true;
+            timer = 0f;  // 타이머 리셋
         }
         // 점프 입력 처리
         if (Keyboard.current.wKey.isPressed && isgrounded)
         {
             rd.linearVelocity = new Vector2(rd.linearVelocity.x, jumpforce);
             isgrounded = false;
+            timer = 0f;
         }
         
         
         if (!(isgrounded))
         {
-            rd.AddForce(new Vector2(0, -10));
+            rd.AddForce(new Vector2(0, -0.2f));
             if (mayspeed > rd.linearVelocity.y)
             {
                 rd.linearVelocity = new Vector2(rd.linearVelocity.x, mayspeed);
             }
         }
-        else
-        {
-            rd.linearVelocity = new Vector2(rd.linearVelocity.x, 0);
-        }
+        rd.AddForce(new Vector2(0, -10f));
     }
     void OnCollisionStay2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Ground"))
+        if (collision.gameObject.CompareTag("Ground") || collision.gameObject.CompareTag("enemy"))
         {
             isgrounded = true;
         }
@@ -95,7 +94,7 @@ public class PlayerController : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Ground"))
+        if (collision.gameObject.CompareTag("Ground") || collision.gameObject.CompareTag("enemy"))
         {
             isgrounded = true;
         }
