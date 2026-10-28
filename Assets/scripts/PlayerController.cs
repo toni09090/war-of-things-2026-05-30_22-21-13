@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
     float jumpforce;
     float timer; //반천장 위에서 점프 가능하게 하기 위한 타이머
     bool isgrounded = false;
+    private playerhealth ph;
     void Start()
     {
         rd = GetComponent<Rigidbody2D>();
@@ -22,6 +23,9 @@ public class PlayerController : MonoBehaviour
         jumpforce = 40f;
         timer = 0f;
         isgrounded = false;
+        ph = GetComponent<playerhealth>();  // ← 추가!
+        Vector2 myPos = transform.position;
+        float posY = transform.position.y;
     }
 
     // Update is called once per frame
@@ -79,6 +83,14 @@ public class PlayerController : MonoBehaviour
             }
         }
         rd.AddForce(new Vector2(0, -10f));
+        Vector2 myPos = transform.position;
+        float posY = transform.position.y;
+        if (posY < -20f)
+        {
+            transform.position = new Vector2(myPos.x, 10f);
+            rd.linearVelocity = new Vector2(rd.linearVelocity.x, 0);
+            ph.TakeDamage(10);
+        }
     }
     void OnCollisionStay2D(Collision2D collision)
     {

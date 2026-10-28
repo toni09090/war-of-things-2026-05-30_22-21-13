@@ -7,11 +7,12 @@ public class commonenemy : MonoBehaviour
     private Transform playerTransform;
     private float acceleration;
     private float maxspeed;
-
+    private playerhealth ph;
     void Start()
     {
         rd = GetComponent<Rigidbody2D>();
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+        ph = GameObject.FindGameObjectWithTag("Player").GetComponent<playerhealth>();
         acceleration = 5f;  // 0.1f → 5f로 증가
         maxspeed = 7.0f;
     }
@@ -44,10 +45,12 @@ public class commonenemy : MonoBehaviour
         if (collision.gameObject.CompareTag("Player"))
         {
             Debug.Log("플레이어와 충돌!");
+            ph.TakeDamage(10);
         }
-        else if (collision.gameObject.CompareTag("Ground"))
+        
+        else if (collision.gameObject.CompareTag("enemy"))
         {
-
+         
         }
         else
         {
