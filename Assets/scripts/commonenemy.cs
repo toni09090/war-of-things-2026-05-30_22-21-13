@@ -52,6 +52,14 @@ public class commonenemy : MonoBehaviour
         {
          
         }
+        else if (collision.gameObject.CompareTag("cilling"))
+        {
+
+        }
+        else if (collision.gameObject.CompareTag("Ground"))
+        {
+
+        }
         else
         {
             rd.linearVelocity = new Vector2(rd.linearVelocity.x, 40f);
